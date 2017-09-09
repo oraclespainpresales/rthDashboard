@@ -1133,6 +1133,7 @@
               return false;
             } else {
               var thresholds = data.responseJSON.PulseThresholds[0];
+              console.log(thresholds);
               $('#HighThresholdInput').attr("placeholder", thresholds.high);
               $('#LowThresholdInput').attr("placeholder", thresholds.low);
               setTimeout(function() {
