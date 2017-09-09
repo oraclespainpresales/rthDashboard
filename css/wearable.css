@@ -1,0 +1,80 @@
+.patient
+{
+	font-size: 34px;
+}
+
+.center-cell
+{
+	text-align: center;
+}
+
+.left-cell
+{
+	text-align: left;
+}
+
+.right-cell
+{
+	text-align: right;
+}
+
+.center-contents
+{
+	margin: 0 auto;
+}
+
+.vcenter-cell
+{
+	vertical-align: middle;
+}
+
+.debug-container {
+	width: 1024px;
+	height: 400px;
+	border-style: solid;
+	border-width: 1px;
+	background-color: #b0c4de;
+	overflow-y:scroll;
+	overflow-x:hidden;
+}
+
+.courier-font {
+	font-family: 'Courier', sans-serif;
+	font-size: 12px;
+}
+
+.courier-font-big {
+	font-family: 'Courier', sans-serif;
+	font-size: 20px;
+}
+
+.no-link {
+	text-decoration: none; /* no underline */
+}
+
+.text-underline {
+	text-decoration: underline;
+}
+
+.clock {
+	font-size: 23px;
+	text-decoration: bold;
+}
+
+.normal-color {
+	font-family: 'Arial', sans-serif;
+	font-size: 106px;
+	color:black;
+}
+
+.normal-blood-color {
+	font-family: 'Arial', sans-serif;
+	font-size: 50px;
+	color:black;
+}
+
+.warning-color {
+	font-family: 'Arial', sans-serif;
+	font-size: 106px;
+	color:red;
+}
