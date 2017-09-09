@@ -1113,6 +1113,7 @@
       }
 
       function getPulseThresholds() {
+        console.log("AAAA");
         $.ajax({
       		type: "GET",
           url: "http://" + serverURI + "/DataServicesMulti/GetPulseThresholdService/getpulsethreshold/" + selectedDevice.imei,
