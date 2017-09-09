@@ -2,7 +2,7 @@
 <html lang="en">
    <head>
       <meta charset="utf-8">
-      <title>IoT Wearable Realtime Dashboard</title>
+      <title>Realtime Healthcare Dashboard</title>
       <!-- Loading Bootstrap -->
       <link href="bootstrap/css/bootstrap.css" rel="stylesheet">
       <!-- Loading Font Awesome Icons -->
@@ -23,10 +23,28 @@
          #DEBUGPANEL {
          height: 610px;
          }
+         .en { display:none; }
+         .es { display:none; }
       </style>
       <script language="javascript" type="text/javascript">
-         var version = "v2.0.7";
+         var version = "v2.2.0";
+         var serverURI = "oraclewearable.ddns.net:8080";
+         var wsserverURI = "oraclewearable.ddns.net:8080";
+
+         function enableLanguage(lan) {
+           for (var i = 0; i < document.styleSheets.length; i++) {
+             if (document.styleSheets[i].cssRules) {
+               var rules = document.styleSheets[i].cssRules;
+               for (var r = 0; r < rules.length; r++) {
+                 if (rules[r].selectorText == "." + lan.toLowerCase()) {
+                   rules[r].style.display = 'block';
+                 }
+               }
+             }
+           }
+         }
       </script>
+
    </head>
    <body onload="setInterval('updateClock()', 1000);">
       <div class="container">
@@ -36,10 +54,21 @@
                   <p>
                      <!-- BEGIN row  TITLE, CLOCK -->
                   <div class="row center-cell">
-                     <div class="col-md-3">
+                     <div class="col-md-3" align=left>
+
+                       <div class="uk-button-dropdown" data-uk-dropdown="{mode:'click'}">
+                           <button id="selectDevice" class="uk-button es">Seleccionar Dispositivo&nbsp;&nbsp;&nbsp;<i class="uk-icon-caret-down"></i></button>
+                           <button id="selectDevice" class="uk-button en">Select Device&nbsp;&nbsp;&nbsp;<i class="uk-icon-caret-down"></i></button>
+                           <div class="uk-dropdown">
+                               <ul id="devices" class="uk-nav uk-nav-dropdown">
+                               </ul>
+                           </div>
+                       </div>
+
+
                      </div>
                      <div class="col-md-6 center-cell">
-                        <h2 class="demo-section-title">IoT Wearable Realtime Dashboard</h2>
+                        <h2 class="demo-section-title">Realtime Healthcare Dashboard</h2>
                      </div>
                      <div class="col-md-3">
                         <div id=watch align=right class="clock"></div>
@@ -61,7 +90,8 @@
                         <div class="panel-body-small">
                            <h6 id=VERSION>&nbsp;</h6>
                            <div id=ConnectedDeviceInfo style="display:none">
-                              <h6 class="text-underline">Información de dispositivo conectado</h6>
+                              <h6 class="text-underline es">Información de dispositivo conectado</h6>
+                              <h6 class="text-underline en">Information from connected device</h6>
                               <h6>
                                  <span class="text-underline">Modelo:&nbsp;</span>
                                  <span id=MODEL></span>
@@ -87,7 +117,8 @@
                      <div class="col-md-8">
                         <div class="panel panel-default">
                            <div class="panel-heading">
-                              <h3 class="panel-title">Paciente registrado</h3>
+                             <h3 class="panel-title es">Paciente registrado</h3>
+                             <h3 class="panel-title en">Registered patient</h3>
                            </div>
                            <div class="panel-body">
                               <div class="row">
@@ -103,7 +134,8 @@
                                  </div>
                                  <div class="col-md-10">
                                     <div class="panel-title">
-                                       <span id=USUARIO class="patient">(ningún paciente registrado)</span>
+                                      <span id=USUARIO class="patient es">(ningún paciente registrado)</span>
+                                      <span id=USUARIO class="patient en">(no patient registered yet)</span>
                                     </div>
                                  </div>
                               </div>
@@ -113,7 +145,8 @@
                      <div class="col-md-1">
                         <div class="panel panel-default">
                            <div class="panel-heading center-cell">
-                              <h3 class="panel-title">Batería</h3>
+                             <h3 class="panel-title es">Batería</h3>
+                             <h3 class="panel-title en">Battery</h3>
                            </div>
                            <div class="panel-body-light center-cell">
                               <div id="batteryGauge"></div>
@@ -123,7 +156,7 @@
                      <div class="col-md-1">
                         <div class="panel panel-default">
                            <div class="panel-heading center-cell">
-                              <h3 class="panel-title">Conexión</h3>
+                              <h3 class="panel-title" id="deviceName">---</h3>
                            </div>
                            <div class="panel-body center-cell">
                               <div id=DISCONNECTED style="display:block">
@@ -142,8 +175,9 @@
                      <div class="col-md-2">
                         <div class="panel panel-info">
                            <div class="panel-heading">
-                              <a class=panel-title no-link" href="javascript:showUpdatePulseThresholds();">
-                                 <h3 class="panel-title center-cell">Pulso (real/media)</h3>
+                              <a class="panel-title no-link" href="javascript:showUpdatePulseThresholds();">
+                                <h3 class="panel-title center-cell es">Pulso (real/media)</h3>
+                                <h3 class="panel-title center-cell en">Pulse (real/average)</h3>
                               </a>
                            </div>
                            <div class="panel-body center-cell">
@@ -155,7 +189,8 @@
                      <div class="col-md-1">
                         <div class="panel panel-info">
                            <div class="panel-heading">
-                              <h3 class="panel-title center-cell">Tensión</h3>
+                             <h3 class="panel-title center-cell es">Tensión</h3>
+                             <h3 class="panel-title center-cell en">Blood Press</h3>
                            </div>
                            <div class="panel-body center-cell">
                               <h2 id=TENSIONA>000</h2>
@@ -166,7 +201,8 @@
                      <div class="col-md-2">
                         <div class="panel panel-info">
                            <div class="panel-heading">
-                              <h3 class="panel-title center-cell">Pasos</h3>
+                             <h3 class="panel-title center-cell es">Pasos</h3>
+                             <h3 class="panel-title center-cell en">Steps</h3>
                            </div>
                            <div class="panel-body center-cell">
                               <h1>
@@ -178,7 +214,8 @@
                      <div class="col-md-2">
                         <div class="panel panel-info">
                            <div class="panel-heading">
-                              <h3 class="panel-title center-cell">Distancia (m)</h3>
+                             <h3 class="panel-title center-cell es">Distancia (m)</h3>
+                             <h3 class="panel-title center-cell en">Distance (m)</h3>
                            </div>
                            <div class="panel-body center-cell">
                               <h1>
@@ -190,7 +227,8 @@
                      <div class="col-md-2">
                         <div class="panel panel-info">
                            <div class="panel-heading">
-                              <h3 class="panel-title center-cell">Peso (Kg)</h3>
+                             <h3 class="panel-title center-cell es">Peso (Kg)</h3>
+                             <h3 class="panel-title center-cell en">Weight (Kg)</h3>
                            </div>
                            <div class="panel-body center-cell">
                               <h1>
@@ -206,7 +244,8 @@
                      <div class="col-md-12">
                         <div class="panel panel-danger">
                            <div class="panel-heading">
-                              <h3 class="panel-title">Alertas</h3>
+                             <h3 class="panel-title es">Alertas</h3>
+                             <h3 class="panel-title en">Alerts</h3>
                            </div>
                            <div class="panel-body">
                               <div class="row">
@@ -426,7 +465,7 @@
                               <form id=ConnectForm name="ConnectForm">
                                  Websocket Server:
                                  <input class="courier-font" id=hostname name="hostname" type="text" size="30" value=''>
-                                 <input type="submit" id="connectButton" formaction="javascript:connect();" value="Connect">
+                                 <input type="submit" id="connectButton" formaction="javascript:connect(seletcedDevice.imei);" value="Connect">
                                  <input type="submit" id="disconnectButton" disabled=true formaction="javascript:disconnect();" value="Disconnect">
                                  <input type="submit" id="resetButton" formaction="javascript:reset();" value="RESET">
                               </form>
@@ -462,7 +501,8 @@
          <div class="uk-modal-dialog">
             <button type="button" class="uk-modal-close uk-close"></button>
             <h3>
-               <center>Establecer nuevos umbrales de pulso</center>
+              <center class="es">Establecer nuevos umbrales de pulso</center>
+              <center class="en">Set new Pulse Thresholds</center>
             </h3>
             <br>
             <div id="GetThresholdsSpinner" style="display:block">
@@ -474,10 +514,12 @@
                   <div class="col-sm-2">
                   </div>
                   <div class="col-sm-4">
-                     <div>Umbral superior</div>
+                    <div class="es">Umbral superior</div>
+                    <div class="es">Upper Threshold</div>
                   </div>
                   <div class="col-sm-4">
-                     <div>Umbral inferior</div>
+                    <div class="es">Umbral inferior</div>
+                    <div class="es">Lower Threshold</div>
                   </div>
                </div>
                <div class="row">
@@ -497,8 +539,26 @@
             </div>
             <br>
             <div class="uk-modal-footer uk-text-right">
-               <button type="button" class="uk-button" onclick="closeUpdatePulseThresholds();">Cancelar</button>
-               <button type="button" class="uk-button uk-button-primary" onclick="saveNewThresholds();">Salvar</button>
+              <button type="button" class="uk-button es" onclick="closeUpdatePulseThresholds();">Cancelar</button>
+              <button type="button" class="uk-button en" onclick="closeUpdatePulseThresholds();">Cancel</button>
+              <button type="button" class="uk-button uk-button-primary es" onclick="saveNewThresholds();">Salvar</button>
+              <button type="button" class="uk-button uk-button-primary en" onclick="saveNewThresholds();">Save</button>
+            </div>
+         </div>
+      </div>
+      <div id="ErrorModalWindow" class="uk-modal">
+         <div class="uk-modal-dialog">
+            <h3>
+               <center id="ErrorModalWindowTitle">dummy</center>
+            </h3>
+            <br>
+            <div id="InputThresholdsPanel" class="row" style="display:block">
+               <div class="row">
+                 <center id="ErrorModalWindowDetail">dummy</center>
+               </div>
+               <div class="row">
+                 <center id="ErrorModalWindowFooter">dummy</center>
+               </div>
             </div>
          </div>
       </div>
@@ -508,8 +568,9 @@
       var debug = false;
       var websocket = null;
       var reconnect = true;
+      var connected = false;
       var wsserver = "";
-      var localwsserver = "bpm12c:8021";
+      var localwsserver = wsserverURI;
       var wsUri;
       var output;
       var aNotifications   = ['\xA0', '\xA0', '\xA0', '\xA0', '\xA0', '\xA0', '\xA0', '\xA0', '\xA0', '\xA0'];
@@ -523,6 +584,17 @@
       var varTimerPing = undefined;
       var varTimerCallback;
       var batteryGauge;
+      var deviceList = [];
+      var selectedDevice = {};
+
+      const LABELS = {
+        ERRORLOADINGDEVICESTITLE: { es: "Error cargando la lista de dispositivos", en: "Error loading the device list" },
+        ERRORLOADINGDEVICESDETAIL: { es: "Detalle", en: "Detail" },
+        ERRORLOADINGDEVICESFOOTER: { es: "Recargar la página para reintentar", en: "Reload whole page to retry" },
+        ERRORCONNECTINGTOSERVER: { es: "Error conectando con el servidor. Refresque el navegador para reintentarlo de nuevo", en: "Error connecting to server. Reload the page to retry" },
+        ERRORCONNECTIONLOST: { es: "Perdida la conexión con el servidor. Desconectando sesión", en: "Connection lost with the server. Disconnecting session" }
+        NOPATIENT: { es: "(ningún paciente registrado)", en: "(no patient registered yet)" }
+      }
 
       window.addEventListener("load", init, false);
 
@@ -533,6 +605,41 @@
       	return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, '\xA0'));
       }
 
+      function setText(element, message) {
+        var e = document.getElementById(element);
+        e.removeChild(e.childNodes[0]);
+        e.appendChild(document.createTextNode(message));
+      }
+
+      function getDeviceList() {
+      	$.ajax({
+      		type: "GET",
+          url: "http://" + serverURI + "/DataServicesMulti/GetDevicesService/getdevices",
+      		contentType: "application/json",
+      		complete: function (data) {
+            if ( data.status !== 200) {
+              writeToScreen("Error getting device list: " + data.status , "red");
+              setText('ErrorModalWindowTitle', LABELS['ERRORLOADINGDEVICESTITLE'][language]);
+              setText('ErrorModalWindowDetail', LABELS['ERRORLOADINGDEVICESDETAIL'][language] + ": " + data.status + " (" + data.statusText + ")");
+              setText('ErrorModalWindowFooter', LABELS['ERRORLOADINGDEVICESFOOTER'][language]);
+              UIkit.modal("#ErrorModalWindow", {keyboard:false, bgclose:false}).show();
+              return;
+            }
+            deviceList = JSON.parse(data.responseText).Devices;
+            var UL = document.getElementById('devices');
+            for ( var i = 0; i < deviceList.length; i ++) {
+              var item = document.createElement('li');
+              var a = document.createElement('a');
+              a.appendChild(document.createTextNode(deviceList[i].name));
+              var att = document.createAttribute("href");
+              att.value = "#";
+              a.setAttributeNode(att);
+              item.appendChild(a);
+              UL.appendChild(item);
+            }
+      		}
+      	});
+      }
 
       function init() {
       	batteryGauge = new JustGage({
@@ -558,22 +665,26 @@
       	output = document.getElementById("output");
       	debug = (getParameterByName('debug') == "true");
       	wsserver = getParameterByName('wsserver');
+        language = getParameterByName('language') || 'en';
+        enableLanguage(language);
       	if ( wsserver == "")
       		wsserver = localwsserver;
       	document.getElementById("ConnectForm").elements["hostname"].value = wsserver;
+
+        // First, let's get the device list
+        getDeviceList();
+
       	if ( debug) {
       		console.log("init()");
       		$('#debugAccordion').css('display', 'block');
-      	} else {
-      		connect();
       	}
       }
 
-      function connect() {
+      function connect(imei) {
       	var msg;
       	hostname = document.getElementById('hostname').value;
 
-      	wsUri = "ws://" + hostname + "/websockets/event?id=DASHBOARD";
+      	wsUri = "ws://" + hostname + "/websocketsmulti/event?id=DASHBOARD," + imei;
       	writeToScreen("Connecting to " + wsUri);
       	websocket = new WebSocket(wsUri);
       	websocket.onopen = function(evt) {
@@ -613,12 +724,14 @@
       	document.getElementById('disconnectButton').disabled = false;
       	document.getElementById('SendRequest').disabled = false;
       	reconnect = true;
+        connected = true;
       }
 
       function onClose(evt) {
       	console.log("onClose()");
       	console.log('Reason: ' + evt.reason);
       	writeToScreen("Disconnected from " + wsUri, "red");
+        connected = false;
       	if ( evt.reason != '') {
       		writeToScreen('Reason: ' + evt.reason+'</span>');
       	}
@@ -637,7 +750,7 @@
       	}
       	if ( reconnect) {
       		console.log("Unexpected disconnection. Trying to reconnect...");
-      		connect();
+      		connect(selectedDevice.imei);
       	}
       }
 
@@ -655,8 +768,8 @@
       		varTimerPing = setInterval(pingServer, pingTimer);
       		// Call REST API REGISTER to refresh patient connected data, if any
       		writeToScreen("About to call registerRequest()" , "green");
-      		console.log("registerRequest()");
       		registerRequest();
+          return;
       	}
         if ( header === "ERR") {
       		var message = evt.data;
@@ -664,7 +777,7 @@
       		writeToScreen("Error connecting with server: " +  messageElements[2], "red");
       		reconnect = false;
       		console.log("Error conectando con el servidor. Refresque el navegador para reintentarlo de nuevo");
-      		insertAlert("ERROR", "Error conectando con el servidor. Refresque el navegador para reintentarlo de nuevo");
+      		insertAlert("ERROR", LABELS['ERRORCONNECTINGTOSERVER'][language]);
       	} else {
       		handleMessage(evt.data);
       		document.getElementById('SendRequest').disabled = false;
@@ -685,16 +798,21 @@
       }
 
       function registerRequest() {
-      	writeToScreen("registerRequest()" , "green");
+/**
+        writeToScreen("registerRequest()" , "green");
+        writeToScreen("URI: "  + "http://" + serverURI + "/WearableDemoMulti/Proxy/register", "green");
+        writeToScreen("Data: " + JSON.stringify({ deviceId : selectedDevice.imei }), "green");
+**/
       	$.ajax({
       		type: "POST",
-//          url: "http://bpm12c:7777/WearableDemo/Proxy/register",
-          url: "http://oraclewearable.ddns.net:8080/WearableDemo/Proxy/register",
-      		data: JSON.stringify({ deviceId : 617005036 }),
+          url: "http://" + serverURI + "/WearableDemoMulti/Proxy/register",
+      		data: JSON.stringify({ deviceId : selectedDevice.imei }),
       		contentType: "application/json",
       		complete: function (data) {
+/**
       			writeToScreen("registerRequest onData()" , "green");
-      			writeToScreen("Data: " + data + "\nStatus: " + status, "blue");
+      			writeToScreen("Data: " + JSON.stringify(data), "blue");
+**/
       		}
       	});
       }
@@ -737,7 +855,7 @@
       	clear();
       	disconnect();
       	resetData();
-      	connect();
+      	connect(selectedDevice.imei);
       }
 
       function pingServer() {
@@ -747,7 +865,7 @@
       	varTimerCallback = setTimeout(function() {
       		console.log("PING NOT RECEIVED IN TIME");
       		writeToScreen("PING TO SERVER LOST (Seq: " + pingSeq + ")", "red");
-      		insertAlert("ERROR", "Perdida la conexión con el servidor. Desconectando sesión");
+      		insertAlert("ERROR", LABELS['ERRORCONNECTIONLOST'][language]);
       		disconnect();
       	}, pingTimeout);
       }
@@ -775,7 +893,7 @@
       }
 
       function resetData() {
-      	user = "(ningún paciente registrado)";
+      	user = LABELS['NOPATIENT'][language];
       	$('#ConnectedDeviceInfo').css('display','none');
       	$('#GREEN').css('display', 'none');
       	$('#RED').css('display', 'block');
@@ -858,23 +976,20 @@
     	}
 
     	function EnablePulseThresholds(){
-    		getPulseThresholds();
-    		$('#THRESHOLDSRESPONSE').text("");
-    		$("#Submit").prop('value', 'Salvar');
-    		$('#PULSETHRESHOLDSPANE').css('display', 'inline-block');
+    		if ( getPulseThresholds()) {
+      		$('#THRESHOLDSRESPONSE').text("");
+      		$("#Submit").prop('value', 'Salvar');
+      		$('#PULSETHRESHOLDSPANE').css('display', 'inline-block');
+        }
     	};
-
-    	function getPulseThresholds() {
-    		var getPulseThresholdsMessage = "REQ|ORACLE|GETPULSETHRESHOLDS|" + new Date().getTime() + "|";
-    		doSend(getPulseThresholdsMessage);
-    	}
 
     	function handleMessage(message) {
 
     		var messageElements = message.split("|");
     		var messageType = messageElements[0];
     		var target = messageElements[1];
-    		if ( target != "DASHBOARD") {
+    		if ( target != "DASHBOARD," + selectedDevice.imei) {
+          writeToScreen("Error: incoming message with invalid target: " + message, "red");
     			return;
     		}
     		var op = messageElements[2];
@@ -967,26 +1082,7 @@
 	    														writeToScreen("WARNING: Ping sequence mistmatch received. Expected: " + pingSeq + ", received: " +  jsonObject.seq, "red");
 	    														clearTimeout(varTimerCallback);
 	    													} else
-	    														if ( op == "GETPULSETHRESHOLDS") {
-	    															// REP|DASHBOARD|GETPULSETHRESHOLDS|1430823922939|{ "low" : 3, "high" : 300 }
-	    															$('#HighThresholdInput').attr("placeholder", jsonObject.high);
-	    															$('#LowThresholdInput').attr("placeholder", jsonObject.low);
-	    															setTimeout(function() {
-	    																$('#GetThresholdsSpinner').css('display', 'none');
-	    																$('#InputThresholdsPanel').css('display', 'block');
-	    															},1000);
-	    														} else
-	    															if ( op == "SETPULSETHRESHOLDS") {
-	    																// REP|DASHBOARD|SETPULSETHRESHOLDS|1430823922939|{ "result" : 0, "detail" : "Request processed successfully" }
-	    																setTimeout(function() {
-	    																	closeUpdatePulseThresholds();
-	    																},500);
-
-	    															} else {
-	    																console.log("[" + messageType + "] Invalid op code: " + op);
-	    															}
-    														} else {
-    															console.log("[" + messageType + "] Invalid op code: " + op);
+  																console.log("[" + messageType + "] Invalid op code: " + op);
     														}
 					}
 
@@ -996,7 +1092,6 @@
       ================================================== -->
    <!-- Placed at the end of the document so the pages load faster -->
    <script src="js/jquery-1.11.0.min.js"></script>
-   <script src="http://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
    <script src="bootstrap/js/bootstrap.min.js"></script>
    <script src="js/bootstrap-switch.js"></script>
    <script src="js/toolbar.js"></script>
@@ -1005,22 +1100,47 @@
    <script src="js/justgage.1.0.1.js"></script>
    <script src="uikit/js/uikit.min.js"></script>
    <script language="javascript" type="text/javascript">
-      $(function() {
-      	$( "#debugAccordion" ).accordion({
-      		collapsible: false,
-      		active: false
-      	});
-      });
-
-
-      var modal = UIkit.modal("#UpdatePulseThresholdsModal");
-
       function showUpdatePulseThresholds() {
-      	modal.show();
+        if ( selectedDevice.imei === "" || selectedDevice.imei === undefined)
+          return;
+      	UIkit.modal("#UpdatePulseThresholdsModal").show();
       }
 
       function closeUpdatePulseThresholds() {
-      	modal.hide();
+      	UIkit.modal("#UpdatePulseThresholdsModal").hide();
+      }
+
+      function getPulseThresholds() {
+        $.ajax({
+      		type: "GET",
+          url: "http://" + serverURI + "/DataServicesMulti/GetPulseThresholdService/getpulsethreshold/" + selectedDevice.imei,
+      		contentType: "application/json",
+      		complete: function (data) {
+            if ( data.status !== 200) {
+              setText('ErrorModalWindowTitle', 'Error recuperando información de pulso');
+              setText('ErrorModalWindowDetail', "Detalle: " + data.status + " (" + data.statusText + ")");
+              setText('ErrorModalWindowFooter', '');
+              UIkit.modal("#ErrorModalWindow", {keyboard:true, bgclose:true}).show();
+              return false;
+            }
+            if ( data.responseJSON === null) {
+              setText('ErrorModalWindowTitle', 'Error recuperando información de pulso');
+              setText('ErrorModalWindowDetail', "La petición no ha devuelto datos para el dispositivo " + selectedDevice.imei);
+              setText('ErrorModalWindowFooter', '');
+              UIkit.modal("#ErrorModalWindow", {keyboard:true, bgclose:true}).show();
+              return false;
+            } else {
+              var thresholds = data.responseJSON.PulseThresholds[0];
+              $('#HighThresholdInput').attr("placeholder", thresholds.high);
+              $('#LowThresholdInput').attr("placeholder", thresholds.low);
+              setTimeout(function() {
+                $('#GetThresholdsSpinner').css('display', 'none');
+                $('#InputThresholdsPanel').css('display', 'block');
+              },500);
+              return true;
+            }
+      		}
+      	});
       }
 
       function saveNewThresholds() {
@@ -1034,24 +1154,77 @@
       	if ( high == "") {
       		high = $('#HighThresholdInput').attr("placeholder");
       	}
-      	var setPulseThresholdsMessage = "REQ|ORACLE|SETPULSETHRESHOLDS|" + new Date().getTime() + "|" + "{" + "\"low\":" + low + "," + "\"high\":" + high + "}";
-      	doSend(setPulseThresholdsMessage);
       	$('#GetThresholdsSpinner').css('display', 'block');
       	$('#InputThresholdsPanel').css('display', 'none');
+
+        var payload = {
+          "PulseThresholds": [ {
+          "id": selectedDevice.imei,
+          "low": low,
+          "high": high
+          } ]
+        };
+
+        $.ajax({
+      		type: "PUT",
+          url: "http://" + serverURI + "/DataServicesMulti/SetPulseThresholdService/setpulsethreshold",
+      		data: JSON.stringify(payload),
+      		contentType: "application/json",
+      		complete: function (data) {
+            closeUpdatePulseThresholds();
+            if ( data.status !== 202) {
+              setText('ErrorModalWindowTitle', 'Error guardando información de pulso');
+              setText('ErrorModalWindowDetail', "Detalle: " + data.status + " (" + data.statusText + ")");
+              setText('ErrorModalWindowFooter', '');
+              UIkit.modal("#ErrorModalWindow", {keyboard:true, bgclose:true}).show();
+              return;
+            }
+      		}
+      	});
       }
 
       $('#UpdatePulseThresholdsModal').on({
-      	'show.uk.modal': function(){
+      	'show.uk.modal': function() {
       		$('#HighThresholdInput').val("");
       		$('#LowThresholdInput').val("");
       		getPulseThresholds();
       	},
-      	'hide.uk.modal': function(){
+      	'hide.uk.modal': function() {
       		$('#GetThresholdsSpinner').css('display', 'block');
       		$('#InputThresholdsPanel').css('display', 'none');
       	}
       });
 
    </script>
+
+   <script language="javascript" type="text/javascript">
+     function getEventTarget(e) {
+         e = e || window.event;
+         return e.target || e.srcElement;
+     }
+
+     var ul = document.getElementById('devices');
+     ul.onclick = function(event) {
+         selectedDevice = {};
+         var target = getEventTarget(event);
+         selectedDevice.name = target.innerHTML;
+         var d = $.grep(deviceList, function(e){ return e.name == selectedDevice.name; });
+         if (d.length == 0) {
+           // Not found?????
+           console.log("device " + selectedDevice.name + ", not found in deviceList array: " + JSON.stringify(deviceList));
+           return;
+         }
+         selectedDevice.imei = d[0].imei;
+         var but = document.getElementById("selectDevice");
+         but.innerHTML = selectedDevice.name + "&nbsp;&nbsp;&nbsp;<i class='uk-icon-caret-down'></i>";
+         var h = document.getElementById("deviceName");
+         h.removeChild(h.childNodes[0]);
+         h.appendChild(document.createTextNode(selectedDevice.name));
+         if (connected)
+           disconnect();
+         connect(selectedDevice.imei);
+     };
+   </script>
+
    </body>
 </html>
