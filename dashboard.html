@@ -591,7 +591,11 @@
         ERRORLOADINGDEVICESFOOTER: { es: "Recargar la página para reintentar", en: "Reload whole page to retry" },
         ERRORCONNECTINGTOSERVER: { es: "Error conectando con el servidor. Refresque el navegador para reintentarlo de nuevo", en: "Error connecting to server. Reload the page to retry" },
         ERRORCONNECTIONLOST: { es: "Perdida la conexión con el servidor. Desconectando sesión", en: "Connection lost with the server. Disconnecting session" },
-        NOPATIENT: { es: "(ningún paciente registrado)", en: "(no patient registered yet)" }
+        NOPATIENT: { es: "(ningún paciente registrado)", en: "(no patient registered yet)" },
+        WATCHREMOVED: { es: "El paciente se ha quitado el reloj durante la medición del pulso", en: "The patient has removed the watch during the pulse measurement" },
+        GETPULSEDATAERROR: { es: "Error recuperando información de pulso", en: "Error while getting pulse information" },
+        GETPULSEDATANODATA: { es: "La petición no ha devuelto datos para el dispositivo", en: "The request hasn't returned data for device" },
+        SETPULSEDATAERROR: { es: "Error guardando información de pulso", en: "Error while saving pulse information" },
       }
 
       window.addEventListener("load", init, false);
@@ -948,7 +952,7 @@
       	if ( currentVal == -1) {
       		batteryGauge.refresh("?");
       	} else {
-      		batteryGauge.refresh(currentVal);
+      		batteryGauge.refresh(Math.round(currentVal * 100) / 100);
       	}
       }
 
@@ -1031,7 +1035,7 @@
     							var type = jsonObject.type;
     							var color = (jsonObject.type == "OK") ? "color:#364347" : "color:#cc0000";
     							if ( jsonObject.type == "WATCH_REMOVED") {
-    								insertAlert("ERROR", "El paciente se ha quitado el reloj durante la medición del pulso");
+    								insertAlert("ERROR", LABELS['WATCHREMOVED'][language]);
     							} else {
     								$('#PULSOAVG').attr('style',color);
     								$('#PULSOAVG').text((jsonObject.value).toFixed(2));
@@ -1115,15 +1119,15 @@
       		contentType: "application/json",
       		complete: function (data) {
             if ( data.status !== 200) {
-              setText('ErrorModalWindowTitle', 'Error recuperando información de pulso');
-              setText('ErrorModalWindowDetail', "Detalle: " + data.status + " (" + data.statusText + ")");
+              setText('ErrorModalWindowTitle', LABELS['GETPULSEDATAERROR'][language]);
+              setText('ErrorModalWindowDetail', "Info: " + data.status + " (" + data.statusText + ")");
               setText('ErrorModalWindowFooter', '');
               UIkit.modal("#ErrorModalWindow", {keyboard:true, bgclose:true}).show();
               return false;
             }
             if ( data.responseJSON === null) {
-              setText('ErrorModalWindowTitle', 'Error recuperando información de pulso');
-              setText('ErrorModalWindowDetail', "La petición no ha devuelto datos para el dispositivo " + selectedDevice.imei);
+              setText('ErrorModalWindowTitle', LABELS['GETPULSEDATAERROR'][language]);
+              setText('ErrorModalWindowDetail', LABELS['GETPULSEDATANODATA'][language] + " " + selectedDevice.imei);
               setText('ErrorModalWindowFooter', '');
               UIkit.modal("#ErrorModalWindow", {keyboard:true, bgclose:true}).show();
               return false;
@@ -1171,8 +1175,8 @@
       		complete: function (data) {
             closeUpdatePulseThresholds();
             if ( data.status !== 202) {
-              setText('ErrorModalWindowTitle', 'Error guardando información de pulso');
-              setText('ErrorModalWindowDetail', "Detalle: " + data.status + " (" + data.statusText + ")");
+              setText('ErrorModalWindowTitle', LABELS['SETPULSEDATAERROR'][language]);
+              setText('ErrorModalWindowDetail', "Info: " + data.status + " (" + data.statusText + ")");
               setText('ErrorModalWindowFooter', '');
               UIkit.modal("#ErrorModalWindow", {keyboard:true, bgclose:true}).show();
               return;
