@@ -527,13 +527,11 @@
                      <div class="col-sm-2">
                      </div>
                      <div class="col-sm-4">
-                       <input id="HighThresholdInput" type="text" class="form-control es" required placeholder="Límite superior">
-                       <input id="HighThresholdInput" type="text" class="form-control en" required placeholder="Upper Threshold">
+                       <input id="HighThresholdInput" type="text" class="form-control" required placeholder="">
                         <span></span>
                      </div>
                      <div class="col-sm-4">
-                       <input id="LowThresholdInput" type="text" class="form-control es" required placeholder="Límite inferior">
-                       <input id="LowThresholdInput" type="text" class="form-control en" required placeholder="Lower Threshold">
+                       <input id="LowThresholdInput" type="text" class="form-control" required placeholder="">
                         <span></span>
                      </div>
                   </div>
@@ -1113,7 +1111,6 @@
       }
 
       function getPulseThresholds() {
-        console.log("AAAA");
         $.ajax({
       		type: "GET",
           url: "http://" + serverURI + "/DataServicesMulti/GetPulseThresholdService/getpulsethreshold/" + selectedDevice.imei,
@@ -1134,7 +1131,6 @@
               return false;
             } else {
               var thresholds = data.responseJSON.PulseThresholds[0];
-              console.log(thresholds);
               $('#HighThresholdInput').attr("placeholder", thresholds.high);
               $('#LowThresholdInput').attr("placeholder", thresholds.low);
               setTimeout(function() {
