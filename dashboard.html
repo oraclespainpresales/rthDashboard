@@ -1063,14 +1063,14 @@
     												updateBattery(jsonObject.value);
     											} else
     												if ( op == "NOTIFICATIONEVENT") {
-    													// NOT|DASHBOARD|NOTIFICATIONEVENT|<corrId>|{ "text" : "my notification text" }
-    														insertNotification(jsonObject.text);
+    													// NOT|DASHBOARD|NOTIFICATIONEVENT|<corrId>|{ "es|en" : "my notification text" }
+    														insertNotification(jsonObject[language]);
     												} else
     													if ( op == "ALERTEVENT") {
-    														// NOT|DASHBOARD|ALERTEVENT|<corrId>|{ "severity" : "INFO", "text" : "my info alert text" }
-    														// NOT|DASHBOARD|ALERTEVENT|<corrId>|{ "severity" : "WARNING", "text" : "my warning alert text" }
-    														// NOT|DASHBOARD|ALERTEVENT|<corrId>|{ "severity" : "ERROR", "text" : "my error alert text" }
-    														insertAlert(jsonObject.severity, jsonObject.text);
+    														// NOT|DASHBOARD|ALERTEVENT|<corrId>|{ "severity" : "INFO", "es|en" : "my info alert text" }
+    														// NOT|DASHBOARD|ALERTEVENT|<corrId>|{ "severity" : "WARNING", "es|en" : "my warning alert text" }
+    														// NOT|DASHBOARD|ALERTEVENT|<corrId>|{ "severity" : "ERROR", "es|en" : "my error alert text" }
+    														insertAlert(jsonObject.severity, jsonObject[language]);
     													} else {
     														console.log("[" + messageType + "] Invalid op code: " + op);
     													}
