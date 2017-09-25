@@ -133,8 +133,7 @@
                                  </div>
                                  <div class="col-md-10">
                                     <div class="panel-title">
-                                      <span id=USUARIO class="patient es">(ningún paciente registrado)</span>
-                                      <span id=USUARIO class="patient en">(no patient registered yet)</span>
+                                      <span id=USUARIO class="patient">n/a</span>
                                     </div>
                                  </div>
                               </div>
@@ -1010,7 +1009,7 @@
     					$('#GREEN').css('display', 'block');
 
     				} else if ( jsonObject.status == "unregistered") {
-    					user = "(no user registered)";
+    					user = "n/a";
     					$('#GREEN').css('display', 'none');
     					$('#RED').css('display', 'block');
     					$('#ConnectedDeviceInfo').css('display','none');
@@ -1018,6 +1017,7 @@
     				} else {
     					// TODO: handle unknown data
     				}
+            console.log("About to update label with: " + user);
     				$('#USUARIO').text(user);
     			} else
     				if ( op == "DEVICEINFOEVENT") {
